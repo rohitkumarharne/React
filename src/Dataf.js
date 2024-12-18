@@ -1,83 +1,89 @@
 import axios from "axios";
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 
-class Dataf extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: [],
-      error: null,
-    };
-  }
-  deletebyid(id) {
-    axios.delete("http://localhost:8086/delete/${id}");
-  }
-  componentDidMount() {
+const Dataf = () => {
+  const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
+
+  // Fetch data using useEffect (similar to componentDidMount)
+  useEffect(() => {
     axios
-      .get("http://localhost:8086/getall") // Fetch employee data from the backend
+      .get("https://spring-production-ce49.up.railway.app/getall")
       .then((response) => {
-        this.setState({
-          data: response.data,
-        });
+        setData(response.data);
       })
       .catch((error) => {
-        this.setState({
-          error: error.message,
-        });
+        setError(error.message);
       });
-  }
+  }, []);
 
-  render() {
-    return (
-      <div style={styles.container}>
-        <h1 style={styles.heading}>Employee List</h1>
-        {this.state.error && (
-          <p style={styles.error}>Error: {this.state.error}</p>
-        )}
+  // Delete employee by ID
+  const deleteEmployee = (id) => {
+    axios
+      .delete(`https://spring-production-ce49.up.railway.app/delete/${id}`)
+      .then(() => {
+        // After successful deletion, remove the employee from the state
+        setData((prevData) =>
+          prevData.filter((employee) => employee.id !== id)
+        );
+      })
+      .catch((error) => {
+        setError("Failed to delete employee: " + error.message);
+      });
+  };
 
-        <div style={styles.tableContainer}>
-          {this.state.data.length > 0 ? (
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.tableHeader}>Name</th>
-                  <th style={styles.tableHeader}>Salary</th>
-                  <th style={styles.tableHeader}>Image</th>
-                  <th style={styles.tableHeader}>Delete</th>
+  return (
+    <div style={styles.container}>
+      <h1 style={styles.heading}>Employee List</h1>
+      {error && <p style={styles.error}>Error: {error}</p>}
+
+      <div style={styles.tableContainer}>
+        {data.length > 0 ? (
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.tableHeader}>Name</th>
+                <th style={styles.tableHeader}>Salary</th>
+                <th style={styles.tableHeader}>Image</th>
+                <th style={styles.tableHeader}>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((employee) => (
+                <tr key={employee.id} style={styles.tableRow}>
+                  <td style={styles.tableCell}>
+                    {employee.name.replace(/^"|"$/g, "")}
+                  </td>
+                  <td style={styles.tableCell}>${employee.sal}</td>
+                  <td style={styles.tableCell}>
+                    {employee.imgname && (
+                      <img
+                        src={`https://spring-production-ce49.up.railway.app/images/${employee.imgname}`}
+                        alt={employee.name}
+                        style={styles.image}
+                      />
+                    )}
+                  </td>
+                  <td style={styles.tableCell}>
+                    {/* Delete button with onClick event */}
+                    <button
+                      style={styles.deleteBtn}
+                      onClick={() => deleteEmployee(employee.id)} // Pass employee.id
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {this.state.data.map((employee) => (
-                  <tr key={employee.id} style={styles.tableRow}>
-                    <td style={styles.tableCell}>
-                      {employee.name.replace(/"/g, "")}
-                    </td>{" "}
-                    {/* Remove quotes from name */}
-                    <td style={styles.tableCell}>${employee.sal}</td>
-                    <td style={styles.tableCell}>
-                      {employee.imgname && (
-                        <img
-                          src={`http://localhost:8086/images/${employee.imgname}`} // Dynamically fetch image from Spring Boot
-                          alt={employee.name}
-                          style={styles.image} // Adjust image size
-                        />
-                      )}
-                    </td>
-                    <td style={styles.tableCell}>
-                      <button> Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p style={styles.noData}>No data available</p>
-          )}
-        </div>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p style={styles.noData}>No data available</p>
+        )}
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 const styles = {
   container: {
@@ -135,6 +141,14 @@ const styles = {
     fontSize: "1.2rem",
     color: "#555",
     marginTop: "20px",
+  },
+  deleteBtn: {
+    backgroundColor: "#f44336",
+    color: "white",
+    padding: "8px 12px",
+    border: "none",
+    cursor: "pointer",
+    borderRadius: "4px",
   },
 };
 
