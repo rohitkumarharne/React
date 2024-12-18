@@ -1,13 +1,13 @@
-import React from "react";
-import Dataf from "./Dataf";
-
-function App() {
-  return (
-    
-    <div className="App">
-      <Dataf />
-    </div>
-  );
+import React, { Component } from "react";
+import Employee from "./Employee";
+class App extends Component {
+  render() {
+    return (
+      <div>
+        <Employee />
+      </div>
+    );
+  }
 }
 
 export default App;
