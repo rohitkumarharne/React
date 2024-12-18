@@ -31,11 +31,15 @@ const Employee = () => {
     data.append("img", formData.img);
 
     try {
-      const response = await axios.post("http://localhost:8086/empsave", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "https://spring-production-ce49.up.railway.app/empsave",
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       alert("Employee saved successfully!");
       console.log(response.data);
     } catch (error) {
